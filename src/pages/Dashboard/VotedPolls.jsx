@@ -11,12 +11,12 @@ import EmptyCard from "../../components/cards/EmptyCard";
 import VOTED_ICON from "../../assets/images/voted-icon-image.png";
 
 const PAGE_SIZE = 10;
+
 const VotedPolls = () => {
   useUserAuth();
   const navigate = useNavigate();
 
   const [votedPolls, setVotedPolls] = useState([]);
-
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,7 @@ const VotedPolls = () => {
   const loadMorePolls = () => {
     setPage((prevPage) => prevPage + 1);
   };
+
   const fetchAllPolls = async () => {
     if (loading) return;
 
@@ -35,19 +36,22 @@ const VotedPolls = () => {
           limit: PAGE_SIZE,
         },
       });
-      if (response?.data?.polls?.length > 0) {
+
+      const newPolls = response?.data?.polls || [];
+
+      if (newPolls.length > 0) {
         setVotedPolls((prevPolls) => {
-          const newPolls = response.data.polls.filter(
+          const uniquePolls = newPolls.filter(
             (newPoll) => !prevPolls.some((poll) => poll._id === newPoll._id)
           );
-          return [...prevPolls, ...newPolls];
+          return [...prevPolls, ...uniquePolls];
         });
-        setHasMore(response.data.polls.length === PAGE_SIZE);
+        setHasMore(newPolls.length === PAGE_SIZE);
       } else {
         setHasMore(false);
       }
     } catch (error) {
-      console.log("something went wrong", error);
+      console.error("Error fetching voted polls:", error);
     } finally {
       setLoading(false);
     }
@@ -55,18 +59,16 @@ const VotedPolls = () => {
 
   useEffect(() => {
     fetchAllPolls();
-
-    return () => {};
   }, [page]);
 
   return (
     <DashboardLayout activeMenu="Voted Polls">
-      <div className="my-5 mx-auto ">
-        <h2 className="text-xl font-medium text-black">Voted Polls</h2>{" "}
+      <div className="my-5 mx-auto">
+        <h2 className="text-xl font-medium text-black">Voted Polls</h2>
         {votedPolls.length === 0 && !loading && (
           <EmptyCard
             imgSrc={VOTED_ICON}
-            message="You have not voted on any poll yet ! start exploring and share your opinion😁!!"
+            message="You have not voted on any poll yet! Start exploring and share your opinion 😁!"
             btnText="Explore"
             onClick={() => navigate("/dashboard")}
           />
@@ -89,14 +91,14 @@ const VotedPolls = () => {
               question={poll.question}
               type={poll.type}
               options={poll.options}
-              voters={poll.voters.length || 0}
+              voters={poll.voters?.length || 0}
               responses={poll.responses || []}
-              creatorProfileImg={poll.creator.profileImageUrl || null}
-              creatorName={poll.creator.fullName}
-              creatorUsername={poll.creator.username}
+              creatorProfileImg={poll?.creator?.profileImageUrl || ""}
+              creatorName={poll?.creator?.fullName || "Unknown"}
+              creatorUsername={poll?.creator?.username || ""}
               userHasVoted={poll.userHasVoted || false}
               isPollClosed={poll.closed || false}
-              createdAt={poll.createdAt || false}
+              createdAt={poll.createdAt || ""}
             />
           ))}
         </InfiniteScroll>

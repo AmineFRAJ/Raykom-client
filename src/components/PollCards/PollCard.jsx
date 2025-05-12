@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import { getPollBookmarked } from "../../utils/helper";
 import UserProfileInfo from "../cards/UserProfileInfo";
@@ -52,17 +52,17 @@ const PollCard = ({
     else setSelectedOptionIndex(value);
   };
   // Generates post data based on the poll type
-  // const getPostData = useCallback(() => {
-  //   if (type === "open-ended") {
-  //     return { responseText: userResponse, voterId: user._id };
-  //   }
+  const getPostData = useCallback(() => {
+    if (type === "open-ended") {
+      return { responseText: userResponse, voterId: user._id };
+    }
 
-  //   if (type === "rating") {
-  //     return { optionIndex: rating - 1, voterId: user._id };
-  //   }
+    if (type === "rating") {
+      return { optionIndex: rating - 1, voterId: user._id };
+    }
 
-  //   return { optionIndex: selectedOptionIndex, voterId: user._id };
-  // }, [type, userResponse, rating, selectedOptionIndex, user]);
+    return { optionIndex: selectedOptionIndex, voterId: user._id };
+  }, [type, userResponse, rating, selectedOptionIndex, user]);
 
   // Get Poll Details by ID
   const getPollDetail = async () => {
@@ -87,10 +87,10 @@ const PollCard = ({
   //handle submission votes
   const handleVoteSubmit = async () => {
     try {
-      // const response = await a<xiosInstance.post(
-      //   API_PATHS.POLLS.VOTE(pollId),
-      //   getPostData()
-      // );
+      const response = await axiosInstance.post(
+        API_PATHS.POLLS.VOTE(pollId),
+        getPostData()
+      );
 
       getPollDetail();
       setIsVoteComplete(true);
