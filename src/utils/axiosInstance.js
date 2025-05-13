@@ -1,9 +1,10 @@
 import axios from "axios";
 import { BASE_URL } from "./apiPaths";
+import toast from "react-hot-toast"; // ✅ make sure this is imported
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -41,6 +42,7 @@ axiosInstance.interceptors.response.use(
       }
     } else if (error.code === "ECONNABORTED") {
       console.error("Request timeout. Please try again.");
+      toast.error("Server is taking too long. Please try again later."); //  
     }
 
     return Promise.reject(error);
